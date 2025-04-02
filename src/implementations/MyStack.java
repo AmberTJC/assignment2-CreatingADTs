@@ -21,6 +21,11 @@ public class MyStack<E> implements StackADT<E>
 		this.capacity = capacity;
 	}
 	
+	public MyStack()
+	{
+		
+	}
+
 	private static class Node<E>
 	{
 		E data;

@@ -34,6 +34,11 @@ public class MyQueue<E> implements QueueADT<E>
 		this.capacity = capacity;
 	}
 
+	public MyQueue()
+	{
+		
+	}
+
 	@Override
 	public void enqueue(E toAdd) throws NullPointerException
 	{
