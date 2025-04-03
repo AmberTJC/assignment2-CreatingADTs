@@ -1,6 +1,7 @@
 package implementations;
 
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 import utilities.Iterator;
 import utilities.ListADT;
@@ -196,29 +197,68 @@ public class MyDLL<E> implements ListADT<E>, Serializable
 	@Override
 	public boolean contains(E toFind) throws NullPointerException
 	{
-		// TODO Auto-generated method stub
+		if (toFind == null) 
+		{
+			throw new NullPointerException("Cannot use null values");
+		}
+		
+		MyDLLNode<E> current = head;
+		while(current != null) 
+		{
+			if (toFind.equals(current.getElement())) 
+			{
+				return true;
+			}
+			current = current.getNext();
+		}
 		return false;
 	}
 
 	@Override
 	public E[] toArray(E[] toHold) throws NullPointerException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (toHold == null) 
+		{
+			throw new NullPointerException();
+		}
+		if(toHold.length< size) 
+		{
+			toHold = (E[]) java.lang.reflect.Array.newInstance(toHold.getClass().getComponentType(), size);
+		}
+		MyDLLNode<E> current = head;
+		int i = 0;
+		
+		while (current != null) 
+		{
+			toHold[i++] = current.getElement();
+			current = current.getNext();
+		}
+		if (toHold.length > size) 
+		{
+			toHold[size] = null;
+		}
+		return toHold;
 	}
 
 	@Override
 	public Object[] toArray()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Object[] result = new Object[size];
+		MyDLLNode<E> current = head; 
+		int i = 0;
+		
+		while (current != null) 
+		{
+			result[i++] = current.getElement();
+			current= current.getNext();
+		}
+		return result;
 	}
 
 	@Override
 	public Iterator<E> iterator()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new MyDLLIterator();
 	}
 	
 	
@@ -277,4 +317,29 @@ public class MyDLL<E> implements ListADT<E>, Serializable
 		return data;
 	}
 
+	
+		private class MyDLLIterator implements Iterator<E>
+		{
+			private MyDLLNode<E> current = head;
+			
+			@Override
+			public boolean hasNext()
+			{
+				return current !=null;
+			}
+
+			@Override
+			public E next() throws NoSuchElementException
+			{
+				if ( !hasNext()) 
+				{
+					throw new NoSuchElementException();
+				}
+				E data = current.getElement();
+				current = current.getNext();
+				
+				return data;
+			}
+			
+		}
 }
