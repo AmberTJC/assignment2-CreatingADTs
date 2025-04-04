@@ -23,7 +23,7 @@ public class MyStack<E> implements StackADT<E>
 	
 	public MyStack()
 	{
-		
+		this.capacity = Integer.MAX_VALUE; 
 	}
 
 	private static class Node<E>
@@ -165,6 +165,7 @@ public class MyStack<E> implements StackADT<E>
 			{
 				return true;
 			}
+			current = current.next;
 		}
 		return false;
 	}
@@ -179,8 +180,11 @@ public class MyStack<E> implements StackADT<E>
 		{
 			if((toFind == null && current.data == null) || (toFind != null && toFind.equals(current.data))) 
 			{
+				
 				return position;
 			}
+			current = current.next;  
+	        position++;
 		}
 		return -1;
 	}
@@ -223,21 +227,25 @@ public class MyStack<E> implements StackADT<E>
 			return false;
 		}
 		
-		Iterator<E> thisiter = this.iterator();
-		Iterator<E> thatiter = that.iterator();
+		Iterator<E> thisIter = this.iterator();
+		Iterator<E> thatIter = that.iterator();
 		
-		while (thisiter.hasNext()&& thatiter.hasNext()) 
+		while (thisIter.hasNext()&& thatIter.hasNext()) 
 		{
-			E a = thisiter.next();
-			E b = thatiter.next();
+			E a = thisIter.next();
+			E b = thatIter.next();
 			
-			if (a == null && b != null) return false;
-			if (a != null && a.equals(b)) return false;
-			if (a == null && b == null) continue;
+			  if (a == null && b != null) return false;      
+		      if (a != null && b == null) return false;       
+		      if (a == null && b == null) continue;          
+		      if (!a.equals(b)) return false;   
 		}
-		return !thisiter.hasNext() && thatiter.hasNext();
+		return !thisIter.hasNext() && !thatIter.hasNext();  
 	}
 
+	 
+	
+	
 	@Override
 	public int size()
 	{
