@@ -25,18 +25,14 @@ public class MyQueue<E> implements QueueADT<E>
 		}
 	}
 	
-	public MyQueue(int capacity) 
-	{
-		if (capacity >= 0) 
-		{
-			throw new IllegalArgumentException("Queue capacity must be greater than zero");
-		}
+	public MyQueue(int capacity) {
+	    if (capacity <= 0) //>=
+	    throw new IllegalArgumentException("Queue capacity must be greater than zero");
 		this.capacity = capacity;
 	}
 
 	public MyQueue()
-	{
-		
+	{ this.capacity = Integer.MAX_VALUE;
 	}
 
 	@Override
@@ -182,23 +178,23 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public boolean equals(QueueADT<E> that)
 	{
-		if (that == null) 
+		if (that == null)
 		{
 			return false;
 		}
-		Iterator<E> thisiter = this.iterator();
-		Iterator<E> thatiter = that.iterator();
+		Iterator<E> thisIter = this.iterator();
+		Iterator<E> thatIter = that.iterator();
 		
-		while(thisiter.hasNext() && thatiter.hasNext()) 
+		while(thisIter.hasNext() && thatIter.hasNext()) 
 		{
-			E a = thisiter.next();
-			E b = thatiter.next();
+			E a = thisIter.next();
+			E b = thatIter.next();
 			
 			if (a == null && b != null) return false;
-			if ( a != null && a.equals(b))return false;
+			if ( a != null && !a.equals(b))return false;  
 			if (a == null && b == null) continue;
 		}
-		return !thisiter.hasNext() && !thatiter.hasNext();
+		return !thisIter.hasNext() && !thatIter.hasNext();
 	}
 
 	@Override

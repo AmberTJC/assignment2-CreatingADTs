@@ -1,3 +1,4 @@
+//april 4
 package implementations;
 
 import java.io.Serializable;
@@ -110,7 +111,7 @@ public class MyArrayList<E> implements ListADT<E>, Serializable
 	@Override
 	public E get(int index) throws IndexOutOfBoundsException
 	{
-		if (index < 0 || index > size()) 
+		if (index < 0 || index >= size()) 
 		{
 			throw new IndexOutOfBoundsException();
 		}

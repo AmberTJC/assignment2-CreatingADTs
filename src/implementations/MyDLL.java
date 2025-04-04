@@ -50,39 +50,38 @@ public class MyDLL<E> implements ListADT<E>, Serializable
 		
 		MyDLLNode<E> newNode = new MyDLLNode<>(toAdd);
 		
-		if (index == size) 
-		{
-			return add(toAdd);
-		}
-		
 		if (index == 0) 
 		{
 			newNode.setNext(head);
-			if( head != null) 
-			{
+			if( head != null) {
 				head.setPrev(newNode);
-				head = newNode;
 			}
-			
-			if (size == 0) 
-			{
+			head = newNode;
+			if (size == 0) {
 				tail = newNode;
 			}
-			else 
-			{
+		}
+		
+			else if (index == size) {
+				 tail.setNext(newNode); 
+			     newNode.setPrev(tail);
+			     tail = newNode;
+			}  
+		
+			 else {
 				MyDLLNode<E> current = getNode(index);
 				MyDLLNode<E> previous = current.getPrev();
+				
 				newNode.setNext(current);
 				newNode.setPrev(previous);
+			
 				if (previous != null) 
 				{
 					previous.setNext(newNode);
 				}
 				current.setPrev(newNode);
 			}
-			size++;
-			
-		}
+		size++;
 		return true;
 	}
 
@@ -102,9 +101,9 @@ public class MyDLL<E> implements ListADT<E>, Serializable
 		}
 		else 
 		{
-			tail.setNext(newNode);
-			tail.setPrev(tail);
-			tail = newNode;
+		    newNode.setPrev(tail); 
+		    tail.setNext(newNode); 
+		    tail = newNode; 
 		}
 		size++;
 		return true;
