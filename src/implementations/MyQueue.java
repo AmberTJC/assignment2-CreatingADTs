@@ -6,10 +6,11 @@
 package implementations;
 
 import java.util.NoSuchElementException;
-
+import implementations.MyDLL;
 import exceptions.EmptyQueueException;
 import utilities.Iterator;
 import utilities.QueueADT;
+import utilities.ListADT;
 
 
 /**
@@ -19,36 +20,30 @@ import utilities.QueueADT;
 public class MyQueue<E> implements QueueADT<E>
 {
 	
-	private Node<E> front;
-	private Node<E> back;
-	private int size = 0;
-	private int capacity;
-	
-	private static class Node<E>
-	{
-		E data;
-		Node<E> next;
-		Node(E data)
-		{
-			this.data = data;
-			this.next = null;
-		}
-	}
+	private final ListADT<E> list;
+	private final int capacity;
 	
 	/**
 	 * A constructor for MyQueue that tracks the queues capacity
-	 * @param capacity how many elements the queue can hold
+	
 	 */
-	public MyQueue(int capacity) {
-	    if (capacity <= 0) //>=
-	    throw new IllegalArgumentException("Queue capacity must be greater than zero");
-		this.capacity = capacity;
+	public MyQueue() {
+	    
+		this.capacity = Integer.MAX_VALUE;
+		this.list = new MyDLL<>();
 	}
 /**
  * A constructor for MyQueue
+ * @param capacity how many elements the queue can hold
  */
-	public MyQueue()
-	{ this.capacity = Integer.MAX_VALUE;
+	public MyQueue(int capacity)
+	{ 
+		if(capacity <= 0) 
+		{
+			throw new IllegalArgumentException("Capacity must be greater than zero");
+		}
+		this.capacity = capacity;
+		this.list = new MyDLL<>();
 	}
 
 	/**
@@ -61,28 +56,15 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public void enqueue(E toAdd) throws NullPointerException
 	{
-		if(toAdd == null) 
+		if (toAdd == null) 
 		{
-			throw new NullPointerException("null values cannot be added to the queue");
+			throw new NullPointerException("Cannot enqueue null.");
 		}
-		
-		if (size == capacity) 
-		{
-			throw new IllegalStateException("Queue is full");
-		}
-		
-		Node<E> newNode = new Node<>(toAdd);
-		
-		if(back == null) 
-		{
-			front = back = newNode;
-		}
-		else 
-		{
-			back.next = newNode;
-			back = newNode;
-		}
-		size++;
+        if (isFull()) 
+        {
+        	throw new IllegalStateException("Queue is full.");
+        }
+        list.add(toAdd);
 	}
 
 	/**
@@ -94,19 +76,11 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public E dequeue() throws EmptyQueueException
 	{
-		if(front == null) 
-		{
-			throw new EmptyQueueException("the queue is empty");
-		}
-		
-		E data = front.data;
-		front = front.next;
-		if(front == null) 
-		{
-			back = null;
-		}
-		size--;
-		return data;
+		 if (isEmpty()) 
+		 {
+			 throw new EmptyQueueException("Queue is empty.");
+		 }
+	        return list.remove(0);
 	}
 
 	/**
@@ -117,11 +91,11 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public E peek() throws EmptyQueueException
 	{
-		if (front == null) 
+		if (isEmpty()) 
 		{
-			throw new EmptyQueueException("the queue is empty");
+			throw new EmptyQueueException("Queue is empty.");
 		}
-		return front.data;
+        return list.get(0);
 	}
 
 	/**
@@ -132,9 +106,7 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public void dequeueAll()
 	{
-		front = null;
-		back = null;
-		size = 0;
+		list.clear();
 		
 	}
 
@@ -146,7 +118,7 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public boolean isEmpty()
 	{
-		return size == 0;
+		return list.isEmpty();
 	}
 
 	/**
@@ -159,21 +131,7 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public boolean contains(E toFind) throws NullPointerException
 	{
-		if (toFind == null) 
-		{
-			throw new NullPointerException("Cannot have null elements");
-		}
-		
-		Node<E> current = front;
-		while (current != null) 
-		{
-			if(toFind.equals(current.data)) 
-			{
-				return true;
-			}
-			current = current.next;
-		}
-		return false;
+		return list.contains(toFind);
 	}
 	/**
 	 *searches for a given value within the queue
@@ -184,17 +142,13 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public int search(E toFind)
 	{
-		Node<E> current = front;
-		int position = 1;
-		
-		while(current != null) 
+		for (int i = 0; i < list.size(); i++) 
 		{
-			if((toFind == null && current.data == null) || (toFind != null && toFind.equals(current.data))) 
-			{
-				return position;
-			}
-			current = current.next;
-			position++;
+            E element = list.get(i);
+            if ((toFind == null && element == null) || (toFind != null && toFind.equals(element))) 
+            {
+                return i + 1;
+            }
 		}
 		return -1;
 	}
@@ -207,50 +161,10 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public Iterator<E> iterator()
 	{
-		return new QueueIterator();
+		return list.iterator();
 	}
 	
-	/**
-	 * Custom Iterator for the MyQueue class
-	 * Precondition: queue exists
-	 * Postcondition: queue iterated through
-	 */
-	private class QueueIterator implements Iterator<E>
-	{
-		private Node<E> current = front;
-
-		/**
-		 * Determines if any value in the queue has a next value
-		 * Precondition: queue exists
-		 * Postconditions: return true if value has a next value false otherwise
-		 */
-		@Override
-		public boolean hasNext()
-		{
-			return current != null;
-		}
-
-		/**
-		 * determines what the next value is in the queue
-		 * Precondition: queue exists
-		 * Postcondition: returns next value
-		 * @exception NoSuchElementException throws when there is no element next
-		 */
-		@Override
-		public E next() throws NoSuchElementException
-		{
-			if(!hasNext()) 
-			{
-				throw new NoSuchElementException();
-			}
-			
-			E data = current.data;
-			current = current.next;
-			
-			return data;
-		}
-		
-	}
+	
 
 	/**
 	 * compares two queues
@@ -288,16 +202,7 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public Object[] toArray()
 	{
-		Object[] result = new Object[size];
-		Node<E> current = front;
-		int index = 0;
-		
-		while (current != null) 
-		{
-			result[index++] = current.data;
-			current = current.next;
-		}
-		return result;
+		return list.toArray();
 	}
 
 	/**
@@ -311,30 +216,7 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public E[] toArray(E[] holder) throws NullPointerException
 	{
-		if(holder == null) 
-		{
-			throw new NullPointerException("The array cannot be null");
-		}
-		
-		int count = size;
-		if (holder.length < count) 
-		{
-			holder = (E[]) java.lang.reflect.Array.newInstance(holder.getClass().getComponentType(), count);
-		}
-		
-		Node<E> current = front;
-		int index = 0;
-		
-		while (current != null) 
-		{
-			holder[index++] = current.data;
-			current = current.next;
-		}
-		if (holder.length > count) 
-		{
-			holder[count] = null;
-		}
-		return holder;
+		 return list.toArray(holder);
 	}
 
 	/**
@@ -345,7 +227,7 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public boolean isFull()
 	{
-		return size == capacity;
+		return list.size() == capacity;
 	}
 
 	/**
@@ -356,7 +238,7 @@ public class MyQueue<E> implements QueueADT<E>
 	@Override
 	public int size()
 	{
-		return size;
+		 return list.size();
 	}
 
 }
