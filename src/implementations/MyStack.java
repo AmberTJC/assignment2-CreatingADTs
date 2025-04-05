@@ -1,16 +1,16 @@
 package implementations;
 
 import java.util.EmptyStackException;
-import java.util.NoSuchElementException;
 
+import java.util.NoSuchElementException;
+import utilities.ListADT;
 import utilities.Iterator;
 import utilities.StackADT;
 
 public class MyStack<E> implements StackADT<E>
 {
-	private int capacity;
-	private int size = 0;
-	private Node<E> top;
+	private final ListADT<E> arrayList;
+    private final int capacity;
 	
 	public MyStack(int capacity) 
 	{
@@ -19,6 +19,7 @@ public class MyStack<E> implements StackADT<E>
 			throw new IllegalArgumentException("Capacity must be greater than zero");
 		}
 		this.capacity = capacity;
+		this.arrayList = new MyArrayList<>();
 	}
 	
 	/**
@@ -27,21 +28,10 @@ public class MyStack<E> implements StackADT<E>
 	public MyStack()
 	{
 		this.capacity = Integer.MAX_VALUE; 
+		this.arrayList = new MyArrayList<>();
 	}
 
-	/**
-	 * Represents a node in the in the stack which contains a element and reference.
-	 * @param <E> 
-	 */
-	private static class Node<E>
-	{
-		E data;
-		Node<E> next;
-		Node(E data)
-		{
-			this.data = data;
-		}
-	}
+	
     /**
      * adds a element to the top of the stack
      * @throws NullPointerException If the element to add is null.
@@ -52,19 +42,15 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public void push(E toAdd) throws NullPointerException
 	{
-		if (toAdd == null) 
-		{
-			throw new NullPointerException("Element added to stack cannot be null");
-		}
-		if(size == capacity) 
-		{
-			throw new IllegalStateException("Stack is full");
-		}
-		
-		Node<E> newNode = new Node<>(toAdd);
-		newNode.next = top;
-		top = newNode;
-		size++;
+		 if (toAdd == null) 
+		 {
+			 throw new NullPointerException("Element cannot be null.");
+		 }
+	        if (stackOverflow()) 
+	        {
+	        	throw new IllegalStateException("Stack is full.");
+	        }
+	        arrayList.add(toAdd);
 		
 	}
    /**
@@ -77,14 +63,11 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public E pop() throws EmptyStackException
 	{
-		if(top == null) 
+		if (isEmpty()) 
 		{
 			throw new EmptyStackException();
 		}
-		E data = top.data;
-		top = top.next;
-		size--;
-		return data;
+        return arrayList.remove(arrayList.size() - 1);
 	}
 
 	/**
@@ -98,11 +81,11 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public E peek() throws EmptyStackException
 	{
-		if(top == null) 
-		{
-			throw new EmptyStackException();
-		}
-		return top.data;
+		if (isEmpty()) 
+	{
+		throw new EmptyStackException();
+	}
+    return arrayList.get(arrayList.size() - 1);
 	}
 	 /**
      * Clears the stack by removing all elements.
@@ -113,8 +96,7 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public void clear()
 	{
-		top = null;
-		size = 0;
+		arrayList.clear();
 		
 	}
 	 /**
@@ -127,7 +109,7 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public boolean isEmpty()
 	{
-		return top == null;
+		return arrayList.isEmpty();
 	}
 
 	
@@ -141,23 +123,12 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public Object[] toArray()
 	{
-		int count = 0;
-		
-		Node<E> current = top;
-		while (current != null) 
-		{
-			count++;
-			current = current.next;
-		}
-		
-		Object[] myArray = new Object[count];
-		current = top;
-		for (int i = 0; i < count; i++) 
-		{
-			myArray[i] = current.data;
-			current = current.next;
-		}
-		return myArray;
+		Object[] result = new Object[arrayList.size()];
+	    for (int i = arrayList.size() - 1, j = 0; i >= 0; i--, j++) 
+	    {
+	        result[j] = arrayList.get(i);
+	    }
+	    return result;
 	}
 	
 	  /**
@@ -169,40 +140,33 @@ public class MyStack<E> implements StackADT<E>
      * Precondition: Holder array is initialized and not null
      * Postcondition: Stack elements are copied into the provided array.
      */
-	@SuppressWarnings("unchecked")
 	@Override
 	public E[] toArray(E[] holder) throws NullPointerException
 	{
-		if (holder == null) 
-		{
-			throw new NullPointerException("Input cannot be null");
-		}
-		
-		int count = 0;
-		
-		Node<E> current = top;
-		while (current != null) 
-		{
-			count++;
-			current = current.next;
-		}
-		if (holder.length < count) 
-		{
-			holder = (E[])java.lang.reflect.Array.newInstance(holder.getClass().getComponentType(), count);
-		}
-		
-		current = top;
-		for( int i = 0; i < count; i++) 
-		{
-			holder[i] = current.data;
-			current = current.next;
-		}
-		
-		if (holder.length > count) 
-		{
-			holder[count] = null;
-		}
-		return holder;
+		if (holder == null) {
+	        throw new NullPointerException("Input cannot be null");
+	    }
+ 
+	    int count = arrayList.size();  // Replaces node traversal to count elements
+ 
+	    if (holder.length < count) {
+	        holder = (E[]) java.lang.reflect.Array.newInstance(
+	            holder.getClass().getComponentType(), count
+	        );
+	    }
+ 
+	
+	    int currentIndex = arrayList.size() - 1;  
+	    for (int i = 0; i < count; i++) {
+	        holder[i] = arrayList.get(currentIndex);  
+	        currentIndex--;                      
+	    }
+ 
+	    if (holder.length > count) {
+	        holder[count] = null;
+	    }
+ 
+	    return holder;
 	}
 
 	
@@ -219,21 +183,7 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public boolean contains(E toFind) throws NullPointerException
 	{
-		if (toFind == null) 
-		{
-			throw new NullPointerException("Cannot find null value");
-		}
-		
-		Node<E> current = top;
-		while (current != null) 
-		{
-			if (toFind.equals(current.data)) 
-			{
-				return true;
-			}
-			current = current.next;
-		}
-		return false;
+		return arrayList.contains(toFind);
 	}
 
     /**
@@ -247,20 +197,15 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public int search(E toFind)
 	{
-		Node<E> current = top;
-		int position = 1;
-		
-		while(current != null) 
+		for (int i = arrayList.size() - 1, position = 1; i >= 0; i--, position++) 
 		{
-			if((toFind == null && current.data == null) || (toFind != null && toFind.equals(current.data))) 
-			{
-				
-				return position;
-			}
-			current = current.next;  
-	        position++;
-		}
-		return -1;
+            E element = arrayList.get(i);
+            if ((toFind == null && element == null) || (toFind != null && toFind.equals(element))) 
+            {
+                return position; 
+            }
+        }
+        return -1;
 	}
 
     /**
@@ -277,7 +222,7 @@ public class MyStack<E> implements StackADT<E>
 	}
 	private class StackIterator implements Iterator<E>
 	{
-		private Node<E> current = top;
+		 private int currentIndex = arrayList.size() - 1;
 
 		
 		/**
@@ -286,7 +231,7 @@ public class MyStack<E> implements StackADT<E>
 		@Override
 		public boolean hasNext()
 		{
-			return current != null;
+			return currentIndex >= 0;
 		}
          /**
           * Returns the next element in the stack.
@@ -294,14 +239,11 @@ public class MyStack<E> implements StackADT<E>
 		@Override
 		public E next() throws NoSuchElementException
 		{
-			if (!hasNext()) 
-			{
-				throw new NoSuchElementException();
-			}
-			
-			E data = current.data;
-			current = current.next;
-			return data;
+			 if (!hasNext()) 
+			 {
+				 throw new NoSuchElementException();
+			 }
+	            return arrayList.get(currentIndex--);
 		}
 		
 	}
@@ -350,7 +292,7 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public int size()
 	{
-		return size;
+		return arrayList.size();
 	}
 
 	 /**
@@ -363,7 +305,7 @@ public class MyStack<E> implements StackADT<E>
 	@Override
 	public boolean stackOverflow()
 	{
-		return size==capacity;
+		return arrayList.size() == capacity;
 	}
 
 }
